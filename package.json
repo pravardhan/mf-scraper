@@ -1,0 +1,33 @@
+{
+  "name": "mf-scraper",
+  "version": "1.0.0",
+  "description": "To crawl the website and get the stocks held by various mutual funds",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pravardhan/mf-scraper.git"
+  },
+  "keywords": [
+    "Mutual",
+    "Fund"
+  ],
+  "author": "Pravardhan Kambagi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pravardhan/mf-scraper/issues"
+  },
+  "homepage": "https://github.com/pravardhan/mf-scraper#readme",
+  "dependencies": {
+    "cheerio": "^0.20.0",
+    "express": "^4.14.0",
+    "jsonfile": "^2.3.1",
+    "request": "^2.72.0",
+    "url-parser": "0.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.9.2"
+  }
+}
