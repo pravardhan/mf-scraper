@@ -3,6 +3,7 @@ var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
 var app = express();
+var fs = require('fs');
 
 var baseUrl = 'http://www.moneycontrol.com';
 var urls = {
@@ -18,7 +19,8 @@ app.get('/scrape/smallcap', function(req, res){
     request(urls.smallCap, function(error, response, html){
         if(!error){
             var allDetailsObject = {};
-            var mfDetails = {}
+            var mfDetails = {};
+            var stockDetails = {};
             
             var $ = cheerio.load(html);
             var listOfUrlsToBeVisited = [];
@@ -50,8 +52,47 @@ app.get('/scrape/smallcap', function(req, res){
                     "5YearReturn": _5yearReturn
                 };
             });
-            res.write(JSON.stringify(mfDetails, null, 4));
-            res.end(); 
+            var count = 0;
+            Object.keys(mfDetails).forEach(function(mfSymbol) {
+                var mfObject = mfDetails[mfSymbol];
+                count++;
+                if(count > 10) {
+                    return false;
+                }
+                console.log(urls.holdingsBase + mfSymbol);
+                request(urls.holdingsBase + mfSymbol, function(error, response, html){
+                    if(!error) {
+                        var $ = cheerio.load(html);
+                        var stockTrs = $(".tblporhd").find("tr");
+                        console.log("Length" + stockTrs.length);
+                        $(stockTrs).each(function(index, stockTr) {
+                            var stockTitle = $(stockTr).find("td:first-child").find("a").attr("title");
+                            var stockMoneycontrolLink = $(stockTr).find("td:first-child").find("a").attr("href");
+                            var portfolioPercentage = $(stockTr).find("td:nth-child(5)").html();
+                            var quantityHeld = $(stockTr).find("td:nth-child(3)").html();
+                            var value = $(stockTr).find("td:nth-child(4)").html();
+                            if(!stockDetails[stockTitle]) {
+                                stockDetails[stockTitle] = {
+                                    moneyControlLink: stockMoneycontrolLink,
+                                    mutualFunds: {}
+                                };
+                            }
+                            stockDetails[stockTitle].mutualFunds[mfSymbol] = {
+                                portfolioPercentage : portfolioPercentage,
+                                quantityHeld: quantityHeld,
+                                value: value
+                            };
+                        });
+                    }
+                });
+            });
+            allDetailsObject = {
+                mfDetails:mfDetails,
+                stocks: stockDetails
+            };
+            res.write(JSON.stringify(allDetailsObject, null, 4), function(){
+                res.end();
+            });
         }
     });
 });
